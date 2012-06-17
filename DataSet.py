@@ -8,9 +8,10 @@ def normalizeSales(row):
   ret = copy.deepcopy(row);
   for i in range(len(ret)):
     if math.isnan(float(ret[i])):
-      ret[i] = math.log(1)
+      # Hardcoding nan to 0.
+      ret[i] = 0
     else:
-      ret[i] = math.log(float(ret[i]))
+      ret[i] = math.log(float(ret[i]) + 1)
   return ret
 
 class DataSet:
