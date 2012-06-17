@@ -29,7 +29,7 @@ class LinearRegression(object):
     num_samples, num_features = features.shape
     A = np.hstack((features, np.ones((num_samples,1))))
     sales = A.dot(self.params)
-    return np.maximum(sales, np.ones(sales.shape))
+    return np.maximum(sales, np.zeros(sales.shape))
 
     
 LearnerBase.register(LinearRegression)

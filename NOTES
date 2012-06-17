@@ -1,0 +1,20 @@
+Many categorical variables and some quantitative variables have 0 variance
+Categorize products into types and predict a type for unseen products
+Auxiliary feature set to 0 for a present value and 1 for a 'NaN', so we can set all NaN's to zero safely
+Log transform of quantitative variables and sales. Is log appropriate for the quantitative features? Could also use splines.
+Merge/collapse/condense the categorical variables?
+Create dictionary of candidate variables. Seed it with the variables themselves. Add interaction terms motivated by what the Random Forest says is important.
+
+Our differentiator is how clever we can be about the variables we select. Everybody is going to be using the same methods.
+
+Methods:
+-GLM_Net: weighted combination of L1 and L2 ridge regressions
+-Gradient boosting
+-Splines
+-Random Forest
+-Neural Networks; input these to other model to make model of residuals?
+-BIC-score based feature selection
+
+
+
+
