@@ -9,7 +9,7 @@ class Ensemble:
     self.learners = []
     self.num_learners = 0
     self.learner_predictions = None
-    self.weights = None
+    self.weights = [1]
     
   def _crossValidateLearners(self, dataset, num_folds):
     for learner_ind,learner in enumerate(self.learners):
@@ -121,18 +121,18 @@ class Ensemble:
     if self.debug:
       print "Training ensemble..."
     self._crossValidateLearners(dataset, num_folds)
-    self.learner_predictions = self._getLearnerCVPredictions(dataset, num_folds)
-    self._selectLearnerWeights(dataset.getSales())
+    # self.learner_predictions = self._getLearnerCVPredictions(dataset, num_folds)
+    # self._selectLearnerWeights(dataset.getSales())
     if self.debug:
       print "Training all models on all data..."
     self._loadOrTrainLearners(dataset.getFeatures(), dataset.getSales(), extension='full')
     
   def predict(self, dataset):
-    probs = np.zeros(dataset.getNumSamples())
+    sales = np.zeros((dataset.getNumSamples(), 12))
     for learner_ind,learner in enumerate(self.learners):
-      probs += learner.predict(dataset.getFeatures()) * self.weights[learner_ind]
+      sales += learner.predict(dataset.getFeatures()) * self.weights[learner_ind]
       
-    return probs
+    return sales
   
   
   

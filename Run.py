@@ -14,11 +14,11 @@ class Run:
     self.test_probs = None
     
   def _eval(self):
-    train_score = Score.Score(self.ds_train.getLabels(), self.train_probs)
-    # test_score = Score.Score(self.ds_test.getLabels(), self.test_probs)    
+    train_score = Score.Score(self.ds_train.getSales(), self.train_probs)
+    # test_score = Score.Score(self.ds_test.getSales(), self.test_probs)    
     
-    print "Train Score %f" %train_score.getLogLoss()
-    # print "Test Score %f" %test_score.getLogLoss()
+    print "Train Score %f" %train_score.getRMSLE()
+    # print "Test Score %f" %test_score.getRMSLE()
     
   def _predict(self):
     if params.DEBUG:
