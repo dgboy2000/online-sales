@@ -19,13 +19,21 @@ class DataSet:
     return self.features
     
   def getSales(self):
-    return self.sales
+    return self.sales    
+    
+
+  def getIndsForMonth(self, month_ind):
+    """Return the indices of the non-NaN sales for the specified month ind [0-11]"""
+    return [ind for ind,val in enumerate(self.sales[:, month_ind]) if val > 1.0]
+    
+  def getFeaturesForMonth(self, month_ind):
+    """Return the features with non-NaN sales for the specified month ind [0-11]."""
+    return self.features[self.getIndsForMonth(month_ind), :]
     
   def getSalesForMonth(self, month_ind):
-    """Return the sales data for the specified month ind []"""
+    """Return the non-NaN sales data for the specified month ind [0-11]."""
+    return self.sales[self.getIndsForMonth(month_ind), month_ind]
     
-  def getFeaturesForMonth():
-    pass
     
   def getNumFeatures(self):
     return self.num_features
