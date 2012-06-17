@@ -1,0 +1,36 @@
+http://www.kaggle.com/c/bioresponse
+
+Requirements: milk, scipy
+milk: sudo port install py27-milk
+
+Architecture:
+
+Classes:
+
+Run
+#run
+#output_kaggle
+
+Dataset
+@features
+@labels
+#load
+#create_folds
+#get_train_fold
+#get_test_fold
+
+Score
+#evaluate(labels, probs)
+
+Ensemble
+#add_learner
+#train
+#predict
+
+Learner
+#train
+#predict
+
+
+
+
