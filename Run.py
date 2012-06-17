@@ -41,9 +41,9 @@ class Run:
     if params.DEBUG:
       print "Training ensemble..."
     self.ensemble = learn.Ensemble.Ensemble(params.DEBUG)
-    # self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
+    self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
+    # self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
+    # self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
           
   def run(self):

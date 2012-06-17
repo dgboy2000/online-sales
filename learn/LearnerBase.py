@@ -9,8 +9,8 @@ class LearnerBase(object):
     return
     
   @abc.abstractmethod
-  def train(self, features, labels):
-    """Train the learner on the specified features and labels."""
+  def train(self, features, sales):
+    """Train the learner on the specified features and sales data."""
     return
 
   @abc.abstractmethod

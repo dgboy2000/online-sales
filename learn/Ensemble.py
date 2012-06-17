@@ -24,7 +24,7 @@ class Ensemble:
       fold_train = dataset.getTrainFold(fold_ind)
       fold_test = dataset.getTestFold(fold_ind)
       prediction_inds = dataset.getTestFoldInds(fold_ind)
-      self._loadOrTrainLearners(fold_train.getFeatures(), fold_train.getLabels(), extension="%dof%d" %(fold_ind+1, num_folds))
+      self._loadOrTrainLearners(fold_train.getFeatures(), fold_train.getSales(), extension="%dof%d" %(fold_ind+1, num_folds))
       for learner_ind,learner in enumerate(self.learners):
         learner_predictions[prediction_inds, learner_ind] = learner.predict(fold_test.getFeatures())
     return learner_predictions    
@@ -48,7 +48,7 @@ class Ensemble:
 
     return learner
     
-  def _loadOrTrainLearner(self, learner, features, labels, extension=None):
+  def _loadOrTrainLearner(self, learner, features, sales, extension=None):
     learner_type = type(learner).__name__
     fname = 'cache/%s' %learner_type
     if extension is not None:
@@ -65,15 +65,15 @@ class Ensemble:
     except:
       if params.DEBUG:
         print "Training and dumping %s..." %fname
-      learner.train(features, labels)
+      learner.train(features, sales)
       pickle.dump(learner, open(fname, 'w'))
 
     return learner
 
-  def _loadOrTrainLearners(self, features, labels, extension=None):
+  def _loadOrTrainLearners(self, features, sales, extension=None):
     """Train all learners on a speficied dataset"""
     for learner_ind, learner in enumerate(self.learners):
-      self.learners[learner_ind] = self._loadOrTrainLearner(learner, features, labels, extension=extension)
+      self.learners[learner_ind] = self._loadOrTrainLearner(learner, features, sales, extension=extension)
 
   def _makeAllSums(self, total, num_elts, delta=0.01):
     """Return a list of all possible tuples of num_elts elements which sum to total,
@@ -90,7 +90,7 @@ class Ensemble:
         tuples.append((a,)+tup)
     return tuples
 
-  def _selectLearnerWeights(self, labels):
+  def _selectLearnerWeights(self, sales):
     """Grid search for the optimal weights on the params."""
     # TODO: this searches for weights over 2 models; search over more
     if self.debug:
@@ -100,7 +100,7 @@ class Ensemble:
     best_weights = None
     for tup in self._makeAllSums(1, 2, delta=0.01):
       combined_predictions = np.asarray(tup).dot(np.asarray((self.learner_predictions[:, 0], self.learner_predictions[:, 1])))
-      cur_score = Score.Score(labels, combined_predictions)
+      cur_score = Score.Score(sales, combined_predictions)
       cur_loss = cur_score.getLogLoss()
       if cur_loss < best_loss:
         if self.debug:
@@ -122,10 +122,10 @@ class Ensemble:
       print "Training ensemble..."
     self._crossValidateLearners(dataset, num_folds)
     self.learner_predictions = self._getLearnerCVPredictions(dataset, num_folds)
-    self._selectLearnerWeights(dataset.getLabels())
+    self._selectLearnerWeights(dataset.getSales())
     if self.debug:
       print "Training all models on all data..."
-    self._loadOrTrainLearners(dataset.getFeatures(), dataset.getLabels(), extension='full')
+    self._loadOrTrainLearners(dataset.getFeatures(), dataset.getSales(), extension='full')
     
   def predict(self, dataset):
     probs = np.zeros(dataset.getNumSamples())
