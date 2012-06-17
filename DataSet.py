@@ -31,6 +31,12 @@ class DataSet:
   def getSales(self):
     return self.sales
     
+  def getSalesForMonth(self, month_ind):
+    """Return the sales data for the specified month ind []"""
+    
+  def getFeaturesForMonth():
+    pass
+    
   def getNumFeatures(self):
     return self.num_features
     
