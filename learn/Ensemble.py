@@ -30,6 +30,9 @@ class Ensemble:
     return learner_predictions    
 
   def _loadOrCVLearner(self, learner, dataset, num_folds):
+    if not os.path.exists('cache'):
+      os.mkdir('cache')
+    
     learner_type = type(learner).__name__
     fname = 'cache/%s.pickle' %learner_type
 
