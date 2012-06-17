@@ -25,6 +25,7 @@ class DataSet:
     """Return the sales data for the specified month ind []"""
     
   def getFeaturesForMonth():
+    pass
     
   def getNumFeatures(self):
     return self.num_features
