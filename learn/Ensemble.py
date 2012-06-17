@@ -111,6 +111,16 @@ class Ensemble:
         if self.debug:
           print "Non-optimal ensemble loss %f with weights %s" %(cur_loss, str(tup))
     self.weights = np.asarray(best_weights)
+    
+    """
+    n samples
+    k learners
+    y is n-vector of actual sales
+    yh is n x k matrix of learner predictions
+    alpha is k-vector of optimal learner weights in an ensemble, by RMSE
+    
+    alpha = (y^T * y)^{-1} * (y^T * y)
+    """
         
   def addLearner(self, learner):
     self.learners.append(learner)
