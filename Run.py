@@ -1,6 +1,7 @@
 import csv
 import DataSet
 import learn
+import os
 import params
 import random
 import Score
@@ -53,6 +54,9 @@ class Run:
     self._eval()
       
   def outputKaggle(self):
+    if not os.path.exists('output'):
+      os.mkdir('output')
+
     data_out = csv.writer(open('output/kaggle.csv','w'))
     for prob in self.test_probs:
       data_out.writerow([prob])

@@ -1,7 +1,18 @@
+import copy
 import csv
 import random
 import math
 import numpy as np
+
+def normalizeSales(row):
+  ret = copy.deepcopy(row);
+  for i in range(len(ret)):
+    if math.isnan(float(ret[i])):
+      # Hardcoding nan to 0.
+      ret[i] = 0
+    else:
+      ret[i] = math.log(float(ret[i]) + 1)
+  return ret
 
 class DataSet:
   def __init__(self, train_set_flag):
@@ -40,7 +51,7 @@ class DataSet:
     
   def getNumSamples(self):
     return self.num_samples
-    
+
   def importData(self, filename):
     self.headers = None
     self.ids = None
@@ -57,7 +68,7 @@ class DataSet:
     
     if self.train_set_flag:
       for row in data_reader:
-        sales.append(row[:12])
+        sales.append(normalizeSales(row[:12]))
         features.append(row[12:])
       self.sales = np.asarray(sales, dtype=np.float64)
     else:
