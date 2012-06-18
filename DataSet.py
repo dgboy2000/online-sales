@@ -81,6 +81,7 @@ class DataSet:
       raise "Already processed useful features; can't do this twice"
       
     self.useless_features.update(self._detectZeroVarianceFeatures())
+    self.useless_features.update(self._detectDuplicateFeatures())
     self._dropFeatureInds(self.useless_features)
     
   def _detectZeroVarianceFeatures(self):
@@ -91,6 +92,17 @@ class DataSet:
     if params.DEBUG:
       print "Found %d zero-variance features: %s" %(len(zero_variance_features), str(zero_variance_features))
     return zero_variance_features
+    
+  def _detectDuplicateFeatures(self):
+    duplicate_feature_to_orig = {}
+    for feat_ind in range(self.num_features):
+      for other_feat_ind in range(feat_ind):
+        if np.var(self.features[:, feat_ind] - self.features[:, other_feat_ind]) == 0:
+          duplicate_feature_to_orig[feat_ind] = other_feat_ind
+          break
+    if params.DEBUG:
+      print "Found %d duplicate features: %s" %(len(duplicate_feature_to_orig), str(duplicate_feature_to_orig))
+    return duplicate_feature_to_orig.keys()
 
   def _setFeatures(self, features):
     self.features = np.asarray(features, dtype=np.float64)
