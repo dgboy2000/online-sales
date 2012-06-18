@@ -9,13 +9,13 @@ class LearnerBase(object):
     return
     
   @abc.abstractmethod
-  def train(self, features, sales):
-    """Train the learner on the specified features and sales data."""
+  def train(self, dataset):
+    """Train the learner on the specified dataset, assuming CV has already occurred."""
     return
 
   @abc.abstractmethod
-  def predict(self, features):
-    """Return a real-number prediction for each feature vector in the specified array."""
+  def predict(self, dataset):
+    """Return a real-number prediction for each sales month on the specified dataset."""
     return
    
 

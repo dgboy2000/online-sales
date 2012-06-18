@@ -20,13 +20,23 @@ class DataSet:
     return self.features
     
   def getSales(self):
-    return self.sales
+    return self.sales    
+    
+
+  def getIndsForMonth(self, month_ind):
+    """Return the indices of the non-NaN sales for the specified month ind [0-11]"""
+    return [ind for ind,val in enumerate(self.sales[:, month_ind]) if val > 0.0]
+    
+  def getFeaturesForMonth(self, month_ind):
+    """Return the features with non-NaN sales for the specified month ind [0-11]."""
+    month_inds = self.getIndsForMonth(month_ind)
+    return self.features[month_inds, :]
     
   def getSalesForMonth(self, month_ind):
-    """Return the sales data for the specified month ind []"""
+    """Return the non-NaN sales data for the specified month ind [0-11]."""
+    month_inds = self.getIndsForMonth(month_ind)
+    return self.sales[self.getIndsForMonth(month_ind), month_ind]
     
-  def getFeaturesForMonth():
-    pass
     
   def getNumFeatures(self):
     return self.num_features
@@ -65,9 +75,9 @@ class DataSet:
       self.sales = np.asarray(sales, dtype=np.float64)
     else:
       for row in data_reader:
-        ids.append(row[0])
+        ids.append(int(row[0]))
         features.append(row[1:])
-      self.ids = np.asarray(ids, dtype=np.float64)
+      self.ids = np.asarray(ids, dtype=np.int32)
       
     self.features = np.asarray(features, dtype=np.float64)
     self.num_samples, self.num_features = self.features.shape

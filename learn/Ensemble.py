@@ -25,9 +25,9 @@ class Ensemble:
       fold_train = dataset.getTrainFold(fold_ind)
       fold_test = dataset.getTestFold(fold_ind)
       prediction_inds = dataset.getTestFoldInds(fold_ind)
-      self._loadOrTrainLearners(fold_train.getFeatures(), fold_train.getSales(), extension="%dof%d" %(fold_ind+1, num_folds))
+      self._loadOrTrainLearners(fold_train, extension="%dof%d" %(fold_ind+1, num_folds))
       for learner_ind,learner in enumerate(self.learners):
-        learner_predictions[prediction_inds, learner_ind] = learner.predict(fold_test.getFeatures())
+        learner_predictions[prediction_inds, learner_ind] = learner.predict(fold_test)
     return learner_predictions    
 
   def _loadOrCVLearner(self, learner, dataset, num_folds):
@@ -52,7 +52,7 @@ class Ensemble:
 
     return learner
     
-  def _loadOrTrainLearner(self, learner, features, sales, extension=None):
+  def _loadOrTrainLearner(self, learner, dataset, extension=None):
     learner_type = type(learner).__name__
     fname = 'cache/%s' %learner_type
     if extension is not None:
@@ -69,15 +69,15 @@ class Ensemble:
     except:
       if params.DEBUG:
         print "Training and dumping %s..." %fname
-      learner.train(features, sales)
+      learner.train(dataset)
       pickle.dump(learner, open(fname, 'w'))
 
     return learner
 
-  def _loadOrTrainLearners(self, features, sales, extension=None):
+  def _loadOrTrainLearners(self, dataset, extension=None):
     """Train all learners on a speficied dataset"""
     for learner_ind, learner in enumerate(self.learners):
-      self.learners[learner_ind] = self._loadOrTrainLearner(learner, features, sales, extension=extension)
+      self.learners[learner_ind] = self._loadOrTrainLearner(learner, dataset, extension=extension)
 
   def _makeAllSums(self, total, num_elts, delta=0.01):
     """Return a list of all possible tuples of num_elts elements which sum to total,
@@ -139,12 +139,12 @@ class Ensemble:
     # self._selectLearnerWeights(dataset.getSales())
     if self.debug:
       print "Training all models on all data..."
-    self._loadOrTrainLearners(dataset.getFeatures(), dataset.getSales(), extension='full')
+    self._loadOrTrainLearners(dataset, extension='full')
     
   def predict(self, dataset):
     sales = np.zeros((dataset.getNumSamples(), 12))
     for learner_ind,learner in enumerate(self.learners):
-      sales += learner.predict(dataset.getFeatures()) * self.weights[learner_ind]
+      sales += learner.predict(dataset) * self.weights[learner_ind]
       
     return sales
   
