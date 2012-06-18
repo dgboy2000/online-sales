@@ -38,6 +38,7 @@ class Run:
       print "Reading test data..."
     self.ds_test = DataSet.DataSet(False)
     self.ds_test.importData('data/test.csv')
+    self.ds_test.dropUselessFeatures(self.ds_train.getUselessFeatures())
     
   def _train(self):
     if params.DEBUG:

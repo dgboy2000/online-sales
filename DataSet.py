@@ -15,7 +15,7 @@ class DataSet:
     self.num_folds = None
     self.num_samples = None
     self.train_set_flag = train_set_flag
-    self.useless_columns = None
+    self.useless_features = set()
     
   def getFeatures(self):
     return self.features
@@ -54,6 +54,42 @@ class DataSet:
       else:
         ret[i] = math.log(float(ret[i]) + 1)
     return ret
+    
+  def getUselessFeatures(self):
+    return self.useless_features
+  def dropUselessFeatures(self, feature_inds):
+    if len(self.useless_features) > 0:
+      raise "Already processed useful features; can't do this twice"
+      
+    self.useless_features = set(feature_inds)
+    self._dropFeatureInds(self.useless_features)
+    
+  def _dropFeatureInds(self, feature_inds):
+    useful_features = np.zeros((self.num_samples, self.num_features - len(feature_inds)))
+    useful_feat_ind = 0
+    for feat_ind in range(self.num_features):
+      if feat_ind not in feature_inds:
+        useful_features[:, useful_feat_ind] = self.features[:, feat_ind]
+        useful_feat_ind += 1
+    
+    self._setFeatures(useful_features)
+    
+  def _detectUsefulFeatures(self):
+    if len(self.useless_features) > 0:
+      raise "Already processed useful features; can't do this twice"
+      
+    self.useless_features.update(self._detectZeroVarianceFeatures())
+    self._dropFeatureInds(self.useless_features)
+    
+  def _detectZeroVarianceFeatures(self):
+    zero_variance_features = []
+    for i in range(self.features.shape[0]):
+      pass
+    return zero_variance_features
+
+  def _setFeatures(self, features):
+    self.features = np.asarray(features, dtype=np.float64)
+    self.num_samples, self.num_features = self.features.shape
 
   def importData(self, filename):
     self.headers = None
@@ -79,19 +115,16 @@ class DataSet:
         ids.append(int(row[0]))
         features.append(row[1:])
       self.ids = np.asarray(ids, dtype=np.int32)
-      
-    self.features = np.asarray(features, dtype=np.float64)
-    self.num_samples, self.num_features = self.features.shape
+    
+    self._setFeatures(features)
     
     # Hack to make things work
     for i in range(self.num_samples):
       for j in range(self.num_features):
         if math.isnan(self.features[i,j]):
           self.features[i,j] = 0.0
-      if self.train_set_flag:
-        for j in range(12):
-          if math.isnan(self.sales[i,j]):
-            self.sales[i,j] = 0.0
+          
+    self._detectUsefulFeatures()
     
   def createFolds(self, num_folds):
     assert self.train_set_flag, "Can only create folds of training data"
