@@ -157,7 +157,7 @@ class DataSet:
     fold_inds = self.getTrainFoldInds(fold)
     ds_train = DataSet(self.train_set_flag)
     ds_train.features = self.features[fold_inds, :]
-    ds_train.sales = self.sales[fold_inds]
+    ds_train.sales = self.sales[fold_inds, :]
     ds_train.num_samples, ds_train.num_features = ds_train.features.shape
     return ds_train
     
@@ -170,7 +170,7 @@ class DataSet:
     fold_inds = self.getTestFoldInds(fold)
     ds_test = DataSet(self.train_set_flag)
     ds_test.features = self.features[fold_inds, :]
-    ds_test.sales = self.sales[fold_inds]
+    ds_test.sales = self.sales[fold_inds, :]
     ds_test.num_samples, ds_test.num_features = ds_test.features.shape
     return ds_test
     

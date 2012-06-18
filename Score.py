@@ -2,10 +2,18 @@ import math
 import numpy as np
 
 class Score:
-  def __init__(self, sales, predictions):
+  def __init__(self, sales=None, predictions=None):
     self.sales = sales
     self.predictions = predictions
     
+  def addFold(self, sales, predictions):
+    if self.sales is None:
+      self.sales = sales
+      self.predictions = predictions
+    else:
+      self.sales = np.vstack((self.sales, sales))
+      self.predictions = np.vstack((self.predictions, predictions))
+  
   def getRMSLE(self):    
     N = 0
     SE = 0
