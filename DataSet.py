@@ -1,7 +1,18 @@
+import copy
 import csv
 import random
 import math
 import numpy as np
+
+def normalizeSales(row):
+  ret = copy.deepcopy(row);
+  for i in range(len(ret)):
+    if math.isnan(float(ret[i])):
+      # Hardcoding nan to 0.
+      ret[i] = 0
+    else:
+      ret[i] = math.log(float(ret[i]) + 1)
+  return ret
 
 class DataSet:
   def __init__(self, train_set_flag):
@@ -19,14 +30,28 @@ class DataSet:
     return self.features
     
   def getSales(self):
-    return self.sales
+    return self.sales    
+    
+
+  def getIndsForMonth(self, month_ind):
+    """Return the indices of the non-NaN sales for the specified month ind [0-11]"""
+    return [ind for ind,val in enumerate(self.sales[:, month_ind]) if val > 1.0]
+    
+  def getFeaturesForMonth(self, month_ind):
+    """Return the features with non-NaN sales for the specified month ind [0-11]."""
+    return self.features[self.getIndsForMonth(month_ind), :]
+    
+  def getSalesForMonth(self, month_ind):
+    """Return the non-NaN sales data for the specified month ind [0-11]."""
+    return self.sales[self.getIndsForMonth(month_ind), month_ind]
+    
     
   def getNumFeatures(self):
     return self.num_features
     
   def getNumSamples(self):
     return self.num_samples
-    
+
   def importData(self, filename):
     self.headers = None
     self.ids = None
@@ -43,7 +68,7 @@ class DataSet:
     
     if self.train_set_flag:
       for row in data_reader:
-        sales.append(row[:12])
+        sales.append(normalizeSales(row[:12]))
         features.append(row[12:])
       self.sales = np.asarray(sales, dtype=np.float64)
     else:

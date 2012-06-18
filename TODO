@@ -1,6 +1,13 @@
--check out the code on patrick's machine/install dependencies
--get data into the old bio system
--parse the data
--get ridge regression working
--get random forest working
--beat random
+Krishna:
+1) NAN feature (K)
+
+Danny:
+1) get ridge regression working (D & P)
+2) get random forest working (D & P)
+3) get ensemble (D & P)
+
+Patrick:
+1) Predict in log space (P)
+2) NAN outcome & scoring (P)
+
+GOAL: beat random (K, D, P)
