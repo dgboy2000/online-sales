@@ -1,8 +1,10 @@
 import copy
 import csv
-import random
 import math
 import numpy as np
+import params
+import random
+
 
 class DataSet:
   def __init__(self, train_set_flag):
@@ -83,8 +85,11 @@ class DataSet:
     
   def _detectZeroVarianceFeatures(self):
     zero_variance_features = []
-    for i in range(self.features.shape[0]):
-      pass
+    for feat_ind in range(self.num_features):
+      if np.var(self.features[:, feat_ind]) == 0:
+        zero_variance_features.append(feat_ind)
+    if params.DEBUG:
+      print "Found %d zero-variance features: %s" %(len(zero_variance_features), str(zero_variance_features))
     return zero_variance_features
 
   def _setFeatures(self, features):
@@ -124,7 +129,8 @@ class DataSet:
         if math.isnan(self.features[i,j]):
           self.features[i,j] = 0.0
           
-    self._detectUsefulFeatures()
+    if self.train_set_flag:
+      self._detectUsefulFeatures()
     
   def createFolds(self, num_folds):
     assert self.train_set_flag, "Can only create folds of training data"
