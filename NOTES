@@ -1,5 +1,6 @@
 Categorize products into types and predict a type for unseen products
 Create dictionary of candidate variables. Seed it with the variables themselves. Add interaction terms motivated by what the Random Forest says is important.
+Make a set of ensemble weights for each month?
 
 Data Notes:
 -Many categorical variables and some quantitative variables have 0 variance; remove these
