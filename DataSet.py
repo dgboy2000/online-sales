@@ -25,6 +25,7 @@ class DataSet:
     self.num_folds = None
     self.num_samples = None
     self.train_set_flag = train_set_flag
+    self.useless_columns = None
     
   def getFeatures(self):
     return self.features

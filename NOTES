@@ -3,6 +3,7 @@ Create dictionary of candidate variables. Seed it with the variables themselves.
 
 Data Notes:
 -Many categorical variables and some quantitative variables have 0 variance; remove these
+-Some variables seem to be duplicates
 -Auxiliary feature set to 0 for a present value and 1 for a 'NaN', so we can set all NaN's to zero safely
 -Log transform of quantitative variables and sales. Is log appropriate for the quantitative features? Could also use splines.
 -Naming of variables. There is both 'quant_22' and 'quan_22'
