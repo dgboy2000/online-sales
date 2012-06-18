@@ -1,6 +1,7 @@
 import csv
 import DataSet
 import learn
+import math
 import os
 import params
 import random
@@ -11,12 +12,12 @@ class Run:
     self.ds_test = None
     self.ds_train = None
     self.ensemble = None
-    self.train_probs = None
-    self.test_probs = None
+    self.train_sales = None
+    self.test_sales = None
     
   def _eval(self):
-    train_score = Score.Score(self.ds_train.getSales(), self.train_probs)
-    # test_score = Score.Score(self.ds_test.getSales(), self.test_probs)    
+    train_score = Score.Score(self.ds_train.getSales(), self.train_sales)
+    # test_score = Score.Score(self.ds_test.getSales(), self.test_sales)    
     
     print "Train Score %f" %train_score.getRMSLE()
     # print "Test Score %f" %test_score.getRMSLE()
@@ -24,8 +25,8 @@ class Run:
   def _predict(self):
     if params.DEBUG:
       print "Running prediction..."
-    self.train_probs = self.ensemble.predict(self.ds_train)
-    self.test_probs = self.ensemble.predict(self.ds_test)
+    self.train_sales = self.ensemble.predict(self.ds_train)
+    self.test_sales = self.ensemble.predict(self.ds_test)
       
   def _setup(self):
     if params.DEBUG:
@@ -58,8 +59,15 @@ class Run:
       os.mkdir('output')
 
     data_out = csv.writer(open('output/kaggle.csv','w'))
-    for prob in self.test_probs:
-      data_out.writerow([prob])
+    
+    headers = ['id']
+    for i in range(12):
+      headers.append("Outcome_M%d" %(i+1))
+    data_out.writerow(headers)
+    
+    for ind,sales in enumerate(self.test_sales):
+      exp_sales = [math.exp(val) for val in sales]
+      data_out.writerow([self.ds_test.ids[ind]] + exp_sales)
     
     
 if __name__ == '__main__':

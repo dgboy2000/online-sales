@@ -6,10 +6,17 @@ class Score:
     self.sales = sales
     self.predictions = predictions
     
-  def getRMSLE(self):
-    N = self.sales.shape[0] * self.sales.shape[1]
-    SE = (self.sales - self.predictions) ** 2
-    return math.sqrt( SE.sum() / N )
+  def getRMSLE(self):    
+    N = 0
+    SE = 0
+    num_samples, num_sales = self.sales.shape
+    for i in range(num_samples):
+      for j in range(num_sales):
+        if self.sales[i, j] > 0:
+          N += 1
+          SE += (self.sales[i, j] - self.predictions[i, j]) ** 2
+    
+    return math.sqrt( SE / N )
     
     
     
