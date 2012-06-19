@@ -7,14 +7,13 @@ import Score
 class RandomForest(object):
   n_values = [60, 80, 100, 125, 150]
   split_values = [1, 2, 3, 4]
-
   
   def __init__(self, n_estimators=100, min_split=2, debug=False):
     self.debug = debug
 
     if debug:
       RandomForest.n_values = [10]
-      RandomForest.split_values = [2, 3]
+      RandomForest.split_values = [2]
 
     self.rf_list = None
     self.n_estimators_list = None

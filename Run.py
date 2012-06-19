@@ -60,9 +60,12 @@ class Run:
     if params.DEBUG:
       print "Training ensemble..."
     self.ensemble = learn.Ensemble.Ensemble(params.DEBUG)
-    self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
+    if params.ADD['LinearRegression']:
+      self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
+    if params.ADD['RidgeRegression']:
+      self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
+    if params.ADD['RandomForest']:  
+      self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
           
   def run(self):
@@ -75,7 +78,9 @@ class Run:
     if not os.path.exists('output'):
       os.mkdir('output')
 
-    data_out = csv.writer(open('output/kaggle.csv','w'))
+    data_out = csv.writer(open('output/kaggle.csv','w')) 
+    if params.DEBUG:
+      data_out = csv.writer(open('output/debug-kaggle.csv','w')) 
     
     headers = ['id']
     for i in range(12):
