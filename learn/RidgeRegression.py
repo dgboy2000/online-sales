@@ -5,9 +5,13 @@ import Score
 
 class RidgeRegression(object):
   # k_values = [8, 9, 10, 11, 12.5, 14]
-  k_values = [6, 7]
+  
   def __init__(self, k=10, debug=False):
     self.debug = debug
+
+    if debug:
+      RidgeRegression.k_values = [6, 7]
+
     self.k_list = None
     self.params = None
     
