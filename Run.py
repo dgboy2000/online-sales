@@ -4,6 +4,7 @@ import learn
 import math
 import os
 import params
+import pickle
 import random
 import Score
 
@@ -16,6 +17,7 @@ class Run:
     self.test_sales = None
     
   def _eval(self):
+    # TODO: separate a train and test dataset for ourselves and report on those numbers
     train_score = Score.Score(self.ds_train.getSales(), self.train_sales)
     # test_score = Score.Score(self.ds_test.getSales(), self.test_sales)    
     
@@ -29,16 +31,30 @@ class Run:
     self.test_sales = self.ensemble.predict(self.ds_test)
       
   def _setup(self):
-    if params.DEBUG:
-      print "Reading training data..."
-    self.ds_train = DataSet.DataSet(True)
-    self.ds_train.importData('data/train.csv')
+    self.ds_train = self._readOrLoadDataset('train')
+    self.ds_test = self._readOrLoadDataset('test', useless_features = self.ds_train.getUselessFeatures())
 
-    if params.DEBUG:
-      print "Reading test data..."
-    self.ds_test = DataSet.DataSet(False)
-    self.ds_test.importData('data/test.csv')
-    self.ds_test.dropUselessFeatures(self.ds_train.getUselessFeatures())
+  def _readOrLoadDataset(self, ds_type, useless_features = None):
+    fname = "cache/%s_data.pickle" %ds_type
+    try:
+      if not params.USE_DATA_CACHE:
+        raise("Do not use cache")
+      f = open(fname, 'rb')
+      ds = pickle.load(f)
+      if params.DEBUG:
+        print "Using cached %s..." %fname
+    except:
+      if params.DEBUG:
+        print "Reading and dumping %s..." %fname
+        
+      data_fname = "data/%s.csv" %ds_type
+      ds = DataSet.DataSet(ds_type == 'train')
+      ds.importData(data_fname)
+      if useless_features is not None:
+        ds.dropUselessFeatures(useless_features)
+      pickle.dump(ds, open(fname, 'w'))
+
+    return ds
     
   def _train(self):
     if params.DEBUG:

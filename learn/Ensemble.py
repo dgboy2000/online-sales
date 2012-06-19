@@ -111,8 +111,7 @@ class Ensemble:
     # self.weights = np.asarray(best_weights)
     
     # Reshape all predictions and sales into long array
-    # Run Krishna's equation for the optimal weights
-    # TODO: separate
+    # TODO: separate ensemble weights for each month
     num_samples, num_months = sales.shape
     num_learners = len(self.learners)
 
@@ -126,6 +125,7 @@ class Ensemble:
     for learner_ind in range(num_learners):
       not_nan_predictions[learner_ind, :] = learner_predictions[learner_ind, not_nan_inds]
     
+    # Krishna's equation for the optimal weights
     self.weights, residues, rank, s = linalg.lstsq(not_nan_predictions.transpose(), sales)
         
   def addLearner(self, learner):
