@@ -3,15 +3,15 @@ NUM_FOLDS = 3
 USE_DATA_CACHE = True
 
 ADD = {
-  'LinearRegression': False,
+  'LinearRegression': True,
   'RidgeRegression': True,
-  'RandomForest': False
+  'RandomForest': True
 }
 
 FEATURE_CACHE = {
-  'LinearRegression': False,
+  'LinearRegression': True,
   'RidgeRegression': True,
-  'RandomForest': False
+  'RandomForest': True
 }
 
 

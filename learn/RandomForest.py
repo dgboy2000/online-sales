@@ -5,19 +5,15 @@ from scipy import linalg
 import Score
 
 class RandomForest(object):
-  n_values = [60, 80, 100, 125, 150]
   split_values = [1, 2, 3, 4]
   
-  def __init__(self, n_estimators=100, min_split=2, debug=False):
+  def __init__(self, debug=False):
     self.debug = debug
-
-    if debug:
-      RandomForest.n_values = [10]
-      RandomForest.split_values = [2]
 
     self.rf_list = None
     self.n_estimators_list = None
     self.min_samples_split_list = None
+    self.best_rmsle_list = None
 
   def _train(self, dataset, 
              n_estimators, 
@@ -32,42 +28,81 @@ class RandomForest(object):
       if self.debug:
         print "Learning on month %d of 12 with %d samples..." %(month_ind+1, len(month_sales))
 
-      if n_estimators_list:
-        rf = RandomForestRegressor(n_estimators=n_estimators_list[month_ind], min_samples_split=min_samples_split_list[month_ind])
-      else:
-        rf = RandomForestRegressor(n_estimators=n_estimators, min_samples_split=min_samples_split)
+      if n_estimators_list is not None:
+        n_estimators = n_estimators_list[month_ind]
 
+      if min_samples_split_list is not None:
+        min_samples_split = min_samples_split_list[month_ind]
+
+      rf = RandomForestRegressor(n_estimators=n_estimators, min_samples_split=min_samples_split)
       rf.fit(dataset.getFeaturesForMonth(month_ind), month_sales)
       self.rf_list.append(rf)
 
+  def get_rmsle_list(self, dataset, num_folds, split, n_list):
+    rmsle_list = []
+    score = Score.Score()
+  
+    for fold_ind in range(num_folds):
+      if self.debug:  
+        print "    Running random forest on fold %d of %d folds" %(fold_ind, num_folds)
+
+      fold_train = dataset.getTrainFold(fold_ind)
+      fold_test = dataset.getTestFold(fold_ind)
+      self._train(fold_train, None, split, n_list)
+      score.addFold(fold_test.getSales(), self.predict(fold_test))
+        
+      for month_ind in range(12):
+        cur_rmsle = score.getRMSLE(month_ind)
+        rmsle_list.append(cur_rmsle)
+          
+        if cur_rmsle < self.best_rmsle_list[month_ind]:
+          self.best_rmsle_list[month_ind] = cur_rmsle
+          self.n_estimators_list[month_ind] = n_list[month_ind]
+          self.min_samples_split_list[month_ind] = split
+    return rmsle_list
+
+  def tenary_search(self, dataset, num_folds, split):
+    left_n_list = (RandomForest.min_n_list * 2 + RandomForest.max_n_list) / 3
+    print "    left_n_list: %s" % left_n_list
+    left_rmsle_list = self.get_rmsle_list(dataset, num_folds, split, left_n_list)
+    
+    right_n_list = (RandomForest.min_n_list + RandomForest.max_n_list * 2) / 3
+    print "    right_n_list: %s" % right_n_list
+    right_rmsle_list = self.get_rmsle_list(dataset, num_folds, split, right_n_list)
+
+    print "    left_rmsle_list: %s" % left_rmsle_list
+    print "    right_rmsle_list: %s" % right_rmsle_list
+
+    for month_ind in range(12):
+      if left_rmsle_list[month_ind] < right_rmsle_list[month_ind]:
+        RandomForest.max_n_list[month_ind] = right_n_list[month_ind] - 1
+      else:
+        RandomForest.min_n_list[month_ind] = left_n_list[month_ind] + 1
+
+    if self.debug:  
+      print "    min_n_list: %s" % (RandomForest.min_n_list)
+      print "    max_n_list: %s" % (RandomForest.max_n_list)
+      print "    n_list: %s" % self.n_estimators_list
+
   def cross_validate(self, dataset, num_folds):
     dataset.createFolds(num_folds)
-    
-    best_rmsle_list = [float("inf")] * 12
+    self.best_rmsle_list = [float("inf")] * 12
     self.n_estimators_list = [0] * 12
     self.min_samples_split_list = [0] * 12
-    
-    for n in RandomForest.n_values:
+
+    if self.debug:
+      self.n_estimators_list = [77, 62, 73, 45, 65, 49, 77, 54, 65, 64, 44, 82]
+      self.min_samples_split_list = [1, 4, 4, 1, 3, 1, 2, 2, 1, 4, 3, 2]
+    else:
       for split in RandomForest.split_values:
+        print "Split: %d" % (split)
+        RandomForest.num_iterations = 10
+        RandomForest.min_n_list = np.array([1] * 12)
+        RandomForest.max_n_list = np.array([100] * 12)
 
-        score = Score.Score()
-
-        for fold_ind in range(num_folds):
-          if self.debug:  
-            print "Running random forest with n_estimators=%d, min_split=%d on fold %d of %d folds" %(n, split, fold_ind, num_folds)
-
-          fold_train = dataset.getTrainFold(fold_ind)
-          fold_test = dataset.getTestFold(fold_ind)
-          self._train(fold_train, n, split)
-          score.addFold(fold_test.getSales(), self.predict(fold_test))
-        
-        for month_ind in range(12):
-          cur_rmsle = score.getRMSLE(month_ind)
-
-          if cur_rmsle < best_rmsle_list[month_ind]:
-            best_rmsle_list[month_ind] = cur_rmsle
-            self.n_estimators_list[month_ind] = n
-            self.min_samples_split_list[month_ind] = split
+        for i in range(RandomForest.num_iterations):
+          print "  Tenary search iteration: %d" % (i+1)
+          self.tenary_search(dataset, num_folds, split)
         
   def train(self, dataset):
     if self.debug:
