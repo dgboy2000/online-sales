@@ -2,12 +2,15 @@ DEBUG = True
 NUM_FOLDS = 3
 USE_DATA_CACHE = True
 
-ADD = {
-  'LinearRegression': False,
-  'RidgeRegression': False,
-  'RandomForest': False,
-  'SupportVectorMachines': True
-}
+ADD = [
+    'LinearRegression',
+    'RidgeRegression',
+    'RandomForest',
+    'SupportVectorMachines',
+    'GradientBoosting'
+]
+
+# ADD = ['GradientBoosting']
 
 FEATURE_CACHE = {
   'LinearRegression': True,

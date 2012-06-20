@@ -94,39 +94,27 @@ class Ensemble:
     if self.debug:
       print "Optimizing ensemble weights..."
 
-    # best_loss = float("inf")
-    # best_weights = None
-    # for tup in self._makeAllSums(1, 2, delta=0.01):
-    #   combined_predictions = np.asarray(tup).dot(np.asarray((self.learner_predictions[:, 0], self.learner_predictions[:, 1])))
-    #   cur_score = Score.Score(sales, combined_predictions)
-    #   cur_loss = cur_score.getLogLoss()
-    #   if cur_loss < best_loss:
-    #     if self.debug:
-    #       print "Achieved new best ensemble loss %f with weights %s" %(cur_loss, str(tup))
-    #     best_loss = cur_loss
-    #     best_weights = tup
-    #   else:
-    #     if self.debug:
-    #       print "Non-optimal ensemble loss %f with weights %s" %(cur_loss, str(tup))
-    # self.weights = np.asarray(best_weights)
-    
-    # Reshape all predictions and sales into long array
-    # TODO: separate ensemble weights for each month
     num_samples, num_months = sales.shape
     num_learners = len(self.learners)
+    self.weights = np.zeros((12, num_learners))
 
-    sales = np.reshape(sales, num_samples * num_months)
-    learner_predictions = np.reshape(self.learner_predictions, (num_learners, num_samples * num_months))
+    for month_ind in range(12):
+      # Drop all predictions and sales where sales are NaN
+      not_nan_inds = [ind for ind,val in enumerate(sales[:,month_ind]) if val > 0.1]
+      not_nan_predictions = np.zeros((num_learners, len(not_nan_inds)))
 
-    # Drop all predictions and sales where sales are NaN
-    not_nan_inds = [ind for ind,val in enumerate(sales) if val > 0.1]
-    not_nan_predictions = np.zeros((num_learners, len(not_nan_inds)))
-    sales = sales[not_nan_inds]
-    for learner_ind in range(num_learners):
-      not_nan_predictions[learner_ind, :] = learner_predictions[learner_ind, not_nan_inds]
-    
-    # Krishna's equation for the optimal weights
-    self.weights, residues, rank, s = linalg.lstsq(not_nan_predictions.transpose(), sales)
+      month_sales = sales[not_nan_inds, month_ind]
+      month_leaner_predictions = np.zeros((len(not_nan_inds),num_learners))
+      
+      for learner_ind in range(num_learners):
+        predictions = []
+        for ind in not_nan_inds:
+          predictions.append(self.learner_predictions[learner_ind][ind][month_ind])
+        month_leaner_predictions[:,learner_ind] = np.vstack(predictions)[:,0]
+
+      # Krishna's equation for the optimal weights
+      self.weights[month_ind, :], residues, rank, s = linalg.lstsq(month_leaner_predictions, month_sales)
+    print self.weights
         
   def addLearner(self, learner):
     self.learners.append(learner)
@@ -145,8 +133,11 @@ class Ensemble:
     
   def predict(self, dataset):
     sales = np.zeros((dataset.getNumSamples(), 12))
+
     for learner_ind,learner in enumerate(self.learners):
-      sales += learner.predict(dataset) * self.weights[learner_ind]
+      predictions = learner.predict(dataset)
+      for month_ind in range(12):
+        sales[:, month_ind] += predictions[:,month_ind] * self.weights[month_ind][learner_ind]
       
     return sales
   
