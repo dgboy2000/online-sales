@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 import csv
 import DataSet
 import learn
@@ -60,13 +61,17 @@ class Run:
     if params.DEBUG:
       print "Training ensemble..."
     self.ensemble = learn.Ensemble.Ensemble(params.DEBUG)
-    
-    self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
-    # self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
-    # self.ensemble.addLearner(learn.SVMRegression.SVMRegression(debug=params.DEBUG))
-    self.ensemble.addLearner(learn.QuantLinearRegression.QuantLinearRegression(debug=params.DEBUG))
-    
+# # <<<<<<< HEAD
+#     
+#     self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
+#     self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
+#     # self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
+#     # self.ensemble.addLearner(learn.SVMRegression.SVMRegression(debug=params.DEBUG))
+#     self.ensemble.addLearner(learn.QuantLinearRegression.QuantLinearRegression(debug=params.DEBUG))
+
+    for learner_class in params.ADD:
+      self.ensemble.addLearner(eval("learn.%s.%s" %(learner_class, learner_class))(debug=params.DEBUG))
+
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
           
   def run(self):
@@ -79,7 +84,7 @@ class Run:
     if not os.path.exists('output'):
       os.mkdir('output')
 
-    data_out = csv.writer(open('output/kaggle.csv','w'))
+    data_out = csv.writer(open('output/kaggle.csv','w')) 
     
     headers = ['id']
     for i in range(12):
