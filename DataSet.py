@@ -19,8 +19,21 @@ class DataSet:
     self.train_set_flag = train_set_flag
     self.useless_features = set()
     
+  def _getQuantitativeHeaderInds(self):
+    quantitative_header_inds = []
+    for ind,header in enumerate(self.headers):
+      if header[:4].lower() == 'quan':
+        quantitative_header_inds.append(ind)
+    return quantitative_header_inds
+    
+  def getHeaders(self):
+    return self.headers
+    
   def getFeatures(self):
     return self.features
+    
+  def getQuantitativeFeatures(self):
+    return self.features[:, self._getQuantitativeHeaderInds()]
     
   def getSales(self):
     return self.sales    
@@ -35,6 +48,9 @@ class DataSet:
     month_inds = self.getIndsForMonth(month_ind)
     return self.features[month_inds, :]
     
+  def getQuantitativeFeaturesForMonth(self, month_ind):
+    return self.getFeaturesForMonth(month_ind)[:, self._getQuantitativeHeaderInds()]
+    
   def getSalesForMonth(self, month_ind):
     """Return the non-NaN sales data for the specified month ind [0-11]."""
     month_inds = self.getIndsForMonth(month_ind)
@@ -43,6 +59,9 @@ class DataSet:
     
   def getNumFeatures(self):
     return self.num_features
+    
+  def getNumQuantitativeFeatures(self):
+    return len(self._getQuantitativeHeaderInds())
     
   def getNumSamples(self):
     return self.num_samples
@@ -69,12 +88,14 @@ class DataSet:
   def _dropFeatureInds(self, feature_inds):
     useful_features = np.zeros((self.num_samples, self.num_features - len(feature_inds)))
     useful_feat_ind = 0
+    useful_headers = []
     for feat_ind in range(self.num_features):
       if feat_ind not in feature_inds:
         useful_features[:, useful_feat_ind] = self.features[:, feat_ind]
         useful_feat_ind += 1
+        useful_headers.append(self.headers[feat_ind])
     
-    self._setFeatures(useful_features)
+    self._setFeatures(useful_features, useful_headers)
     
   def _detectUsefulFeatures(self):
     if len(self.useless_features) > 0:
@@ -104,9 +125,10 @@ class DataSet:
       print "Found %d duplicate features: %s" %(len(duplicate_feature_to_orig), str(duplicate_feature_to_orig))
     return duplicate_feature_to_orig.keys()
 
-  def _setFeatures(self, features):
+  def _setFeatures(self, features, headers):
     self.features = np.asarray(features, dtype=np.float64)
     self.num_samples, self.num_features = self.features.shape
+    self.headers = headers
 
   def importData(self, filename):
     self.headers = None
@@ -115,8 +137,8 @@ class DataSet:
     self.features = None
     
     data_reader = csv.reader(open(filename, 'rb'))
-    self.headers = data_reader.next()
-    num_features = len(self.headers) - 12
+    headers = data_reader.next()
+    num_features = len(headers) - 12
     
     ids = []
     sales = []
@@ -127,13 +149,15 @@ class DataSet:
         sales.append(self._normalizeSales(row[:12]))
         features.append(row[12:])
       self.sales = np.asarray(sales, dtype=np.float64)
+      headers = headers[12:]
     else:
       for row in data_reader:
         ids.append(int(row[0]))
         features.append(row[1:])
       self.ids = np.asarray(ids, dtype=np.int32)
+      headers = headers[1:]
     
-    self._setFeatures(features)
+    self._setFeatures(features, headers)
     
     # Hack to make things work
     for i in range(self.num_samples):
@@ -155,11 +179,7 @@ class DataSet:
     if fold < 0 or fold >= self.num_folds:
       raise Exception("Requested invalid train fold %d; there are %d total folds" %(fold, self.num_folds))
     fold_inds = self.getTrainFoldInds(fold)
-    ds_train = DataSet(self.train_set_flag)
-    ds_train.features = self.features[fold_inds, :]
-    ds_train.sales = self.sales[fold_inds, :]
-    ds_train.num_samples, ds_train.num_features = ds_train.features.shape
-    return ds_train
+    return self._getFold(fold_inds)
     
   def getTrainFoldInds(self, fold):
     return range(0, fold * self.getNumSamples() / self.num_folds) + range((fold+1) * self.getNumSamples() / self.num_folds, self.getNumSamples())
@@ -168,11 +188,16 @@ class DataSet:
     if fold < 0 or fold >= self.num_folds:
       raise Exception("Requested invalid test fold %d; there are %d total folds" %(fold, self.num_folds))
     fold_inds = self.getTestFoldInds(fold)
-    ds_test = DataSet(self.train_set_flag)
-    ds_test.features = self.features[fold_inds, :]
-    ds_test.sales = self.sales[fold_inds, :]
-    ds_test.num_samples, ds_test.num_features = ds_test.features.shape
-    return ds_test
+    return self._getFold(fold_inds)
+    
+  def _getFold(self, fold_inds):
+    fold = DataSet(self.train_set_flag)
+    fold.features = self.features[fold_inds, :]
+    fold.sales = self.sales[fold_inds, :]
+    fold.headers = list(self.headers)
+    fold.num_samples, fold.num_features = fold.features.shape
+    return fold
+    
     
   def getTestFoldInds(self, fold):
     return range(fold * self.getNumSamples() / self.num_folds, (fold+1) * self.getNumSamples() / self.num_folds)

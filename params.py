@@ -6,7 +6,8 @@ USE_DATA_CACHE = True
 FEATURE_CACHE = {
   'LinearRegression': True,
   'RidgeRegression': False,
-  'RandomForest': True
+  'RandomForest': True,
+  'SVMRegression': False
 }
 
 

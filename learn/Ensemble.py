@@ -49,7 +49,10 @@ class Ensemble:
       if params.DEBUG:
         print "Cross-validating %s..." %learner_type
       learner.cross_validate(dataset, num_folds)
-      pickle.dump(learner, open(fname, 'w'))
+      try:
+        pickle.dump(learner, open(fname, 'w'))
+      except:
+        print "WARNING: couldn't cache %s" %fname
 
     return learner
     
@@ -71,7 +74,10 @@ class Ensemble:
       if params.DEBUG:
         print "Training and dumping %s..." %fname
       learner.train(dataset)
-      pickle.dump(learner, open(fname, 'w'))
+      try:
+        pickle.dump(learner, open(fname, 'w'))
+      except:
+        print "WARNING: couldn't cache %s" %fname
 
     return learner
 
