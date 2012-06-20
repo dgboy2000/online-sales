@@ -2,8 +2,9 @@ DEBUG = True
 NUM_FOLDS = 3
 USE_DATA_CACHE = True
 
-ADD = [
+ENSEMBLE = [
     'LinearRegression',
+    'QuantLinearRegression',
     'RidgeRegression',
     'RandomForest',
     'SupportVectorMachines',
@@ -15,6 +16,7 @@ ADD = [
 
 FEATURE_CACHE = {
   'LinearRegression': True,
+  'QuantLinearRegression': True,
   'SVMRegression': False,
   'RidgeRegression': True,
   'RandomForest': True

@@ -61,15 +61,8 @@ class Run:
     if params.DEBUG:
       print "Training ensemble..."
     self.ensemble = learn.Ensemble.Ensemble(params.DEBUG)
-# # <<<<<<< HEAD
-#     
-#     self.ensemble.addLearner(learn.LinearRegression.LinearRegression(debug=params.DEBUG))
-#     self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
-#     # self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
-#     # self.ensemble.addLearner(learn.SVMRegression.SVMRegression(debug=params.DEBUG))
-#     self.ensemble.addLearner(learn.QuantLinearRegression.QuantLinearRegression(debug=params.DEBUG))
 
-    for learner_class in params.ADD:
+    for learner_class in params.ENSEMBLE:
       self.ensemble.addLearner(eval("learn.%s.%s" %(learner_class, learner_class))(debug=params.DEBUG))
 
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
