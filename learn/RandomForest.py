@@ -91,14 +91,14 @@ class RandomForest(object):
     self.min_samples_split_list = [0] * 12
 
     if self.debug:
-      self.n_estimators_list = [77, 62, 73, 45, 65, 49, 77, 54, 65, 64, 44, 82]
-      self.min_samples_split_list = [1, 4, 4, 1, 3, 1, 2, 2, 1, 4, 3, 2]
+      self.n_estimators_list = [100, 106, 117, 84, 91, 50, 100, 66, 58, 33, 77, 117]
+      self.min_samples_split_list = [2, 1, 2, 4, 1, 1, 2, 1, 1, 2, 3, 1]
     else:
       for split in RandomForest.split_values:
         print "Split: %d" % (split)
         RandomForest.num_iterations = 10
         RandomForest.min_n_list = np.array([1] * 12)
-        RandomForest.max_n_list = np.array([100] * 12)
+        RandomForest.max_n_list = np.array([150] * 12)
 
         for i in range(RandomForest.num_iterations):
           print "  Tenary search iteration: %d" % (i+1)

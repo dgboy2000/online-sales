@@ -66,6 +66,8 @@ class Run:
       self.ensemble.addLearner(learn.RidgeRegression.RidgeRegression(debug=params.DEBUG))
     if params.ADD['RandomForest']:  
       self.ensemble.addLearner(learn.RandomForest.RandomForest(debug=params.DEBUG))
+    if params.ADD['SupportVectorMachines']:  
+      self.ensemble.addLearner(learn.SupportVectorMachines.SupportVectorMachines(debug=params.DEBUG))
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
           
   def run(self):

@@ -10,12 +10,6 @@ class RidgeRegression(object):
   
   def __init__(self, debug=False):
     self.debug = debug
-
-    if debug:
-      RidgeRegression.num_iterations = 1
-      RidgeRegression.min_k_list = np.array([5.87542267, 4.674982, 8.13359445, 6.74467722, 6.08883212, 6.17201609, 5.29976006, 4.99435439, 5.72486321, 13.28838441, 5.22491289, 5.99526002])
-      RidgeRegression.max_k_list = np.array([5.88439942, 4.68395875, 8.1425712, 6.75365397, 6.09780887, 6.18099284, 5.30873681, 5.00333114, 5.73383996, 13.29736116, 5.23388964, 6.00423677])
-
     self.k_list = None
     self.params = None
     self.best_rmsle_list = [float("inf")] * 12
@@ -90,14 +84,17 @@ class RidgeRegression(object):
       print "  k_list: %s" % self.k_list
     
   def cross_validate(self, dataset, num_folds):
-    dataset.createFolds(num_folds)
+    if self.debug:
+      self.k_list = [5.87542267, 4.674982, 8.13359445, 6.74467722, 6.08883212, 6.17201609, 5.29976006, 4.99435439, 5.72486321, 13.28838441, 5.22491289, 5.99526002]
+    else:
+      dataset.createFolds(num_folds)
 
-    best_rmsle_list = [float("inf")] * 12
-    self.k_list = [0] * 12
+      best_rmsle_list = [float("inf")] * 12
+      self.k_list = [0] * 12
 
-    for i in range(RidgeRegression.num_iterations):
-      print "Tenary search iteration: %d" % (i+1)
-      self.tenary_search(dataset, num_folds)
+      for i in range(RidgeRegression.num_iterations):
+        print "Tenary search iteration: %d" % (i+1)
+        self.tenary_search(dataset, num_folds)
         
   def train(self, dataset):
     if self.debug:
