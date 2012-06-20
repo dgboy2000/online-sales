@@ -1,3 +1,4 @@
+#!/usr/local/bin/python
 import csv
 import DataSet
 import learn
@@ -70,6 +71,8 @@ class Run:
       self.ensemble.addLearner(learn.SupportVectorMachines.SupportVectorMachines(debug=params.DEBUG))
     if 'GradientBoosting' in params.ADD:
       self.ensemble.addLearner(learn.GradientBoosting.GradientBoosting(debug=params.DEBUG))
+    if 'DecisionTree' in params.ADD:
+      self.ensemble.addLearner(learn.DecisionTree.DecisionTree(debug=params.DEBUG))
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)
           
   def run(self):
@@ -83,8 +86,6 @@ class Run:
       os.mkdir('output')
 
     data_out = csv.writer(open('output/kaggle.csv','w')) 
-    if params.DEBUG:
-      data_out = csv.writer(open('output/debug-kaggle.csv','w')) 
     
     headers = ['id']
     for i in range(12):

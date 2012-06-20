@@ -7,10 +7,11 @@ ADD = [
     'RidgeRegression',
     'RandomForest',
     'SupportVectorMachines',
-    'GradientBoosting'
+    'GradientBoosting',
+    'DecisionTree'
 ]
 
-# ADD = ['GradientBoosting']
+# ADD = [ 'DecisionTree' ]
 
 FEATURE_CACHE = {
   'LinearRegression': True,
