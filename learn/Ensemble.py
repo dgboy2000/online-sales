@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import os
 import params
@@ -104,23 +105,33 @@ class Ensemble:
     num_learners = len(self.learners)
     self.weights = np.zeros((12, num_learners))
 
+    sum_sq = 0
+    num_sq = 0
     for month_ind in range(12):
       # Drop all predictions and sales where sales are NaN
       not_nan_inds = [ind for ind,val in enumerate(sales[:,month_ind]) if val > 0.1]
       not_nan_predictions = np.zeros((num_learners, len(not_nan_inds)))
 
       month_sales = sales[not_nan_inds, month_ind]
-      month_leaner_predictions = np.zeros((len(not_nan_inds),num_learners))
+      month_learner_predictions = np.zeros((len(not_nan_inds),num_learners))
       
       for learner_ind in range(num_learners):
         predictions = []
         for ind in not_nan_inds:
           predictions.append(self.learner_predictions[learner_ind][ind][month_ind])
-        month_leaner_predictions[:,learner_ind] = np.vstack(predictions)[:,0]
+        month_learner_predictions[:,learner_ind] = np.vstack(predictions)[:,0]
 
       # Krishna's equation for the optimal weights
-      self.weights[month_ind, :], residues, rank, s = linalg.lstsq(month_leaner_predictions, month_sales)
+      self.weights[month_ind, :], residues, rank, s = linalg.lstsq(month_learner_predictions, month_sales)
+      
+      sum_sq += residues
+      try:
+        num_sq += len(month_sales)
+      except:
+        import pdb;pdb.set_trace()
+        pass
     print self.weights
+    print "Ensemble train error on %d samples: %f" %(num_sq, math.sqrt(sum_sq / num_sq))
         
   def addLearner(self, learner):
     self.learners.append(learner)
