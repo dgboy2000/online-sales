@@ -16,6 +16,8 @@ class DataSet:
     self.num_features = None
     self.num_folds = None
     self.num_samples = None
+    self.quant_means = None
+    self.quant_variances = None
     self.train_set_flag = train_set_flag
     self.useless_features = set()
     
@@ -65,6 +67,37 @@ class DataSet:
     
   def getNumSamples(self):
     return self.num_samples
+    
+    
+    
+  def logTransformQuantitativeFeatures(self):
+    quant_feat_inds = self._getQuantitativeHeaderInds()
+    if (self.features[:, quant_feat_inds] == 0).sum() > 0:
+      ZERO_VAL = 0.2
+      print "WARNING: some quantitative features have value 0; changing these to %f to take log" %ZERO_VAL
+      self.features[:, quant_feat_inds] = np.max(np.dstack((self.features[:, quant_feat_inds], ZERO_VAL * np.ones((self.getNumSamples(), len(quant_feat_inds))) )), axis=2)
+    self.features[:, quant_feat_inds] = np.log(self.features[:, quant_feat_inds])
+    
+  def standardizeQuantitativeFeatures(self, means=None, variances=None):
+    """Standardize the quantitative features to be mean 0, variance 1. If means/variances are specified,
+    use them to normalize the data."""
+    quant_feat_inds = self._getQuantitativeHeaderInds()
+    if means is None:
+      means = np.mean(self.features[:, quant_feat_inds], axis=0)
+    if variances is None:
+      variances = np.var(self.features[:, quant_feat_inds], axis=0)
+    self.quant_means = means
+    self.quant_variances = variances
+    for quant_ind,feat_ind in enumerate(quant_feat_inds):
+      self.features[:, feat_ind] = (self.features[:, feat_ind] - means[quant_ind]) / np.sqrt(variances[quant_ind])
+      
+  def getQuantitativeFeatureMeans(self):
+    return self.quant_means
+    
+  def getQuantitativeFeatureVariances(self):
+    return self.quant_variances
+    
+    
 
   def _normalizeSales(self, row):
     ret = copy.deepcopy(row);
@@ -75,6 +108,25 @@ class DataSet:
       else:
         ret[i] = math.log(float(ret[i]) + 1)
     return ret
+    
+  def _changeNanToZero(self):
+    for i in range(self.num_samples):
+      for j in range(self.num_features):
+        if math.isnan(self.features[i,j]):
+          self.features[i,j] = 0.0
+          
+  def _addDerivedFeatures(self):
+    features = self.features
+    headers = self.headers
+    num_samples = self.getNumSamples()
+    
+    headers.append('Quant_PrelaunchMarketingDays')
+    date1_ind = headers.index('Date_1')
+    date2_ind = headers.index('Date_2')
+    new_feat = (features[:, date1_ind]-features[:, date2_ind]).reshape((num_samples, 1))
+    features = np.append(features, new_feat, axis=1)
+    
+    self._setFeatures(features, headers)
     
   def getUselessFeatures(self):
     return self.useless_features
@@ -130,7 +182,7 @@ class DataSet:
     self.num_samples, self.num_features = self.features.shape
     self.headers = headers
 
-  def importData(self, filename):
+  def importData(self, filename, ):
     self.headers = None
     self.ids = None
     self.sales = None
@@ -159,11 +211,8 @@ class DataSet:
     
     self._setFeatures(features, headers)
     
-    # Hack to make things work
-    for i in range(self.num_samples):
-      for j in range(self.num_features):
-        if math.isnan(self.features[i,j]):
-          self.features[i,j] = 0.0
+    self._changeNanToZero()
+    self._addDerivedFeatures()
           
     if self.train_set_flag:
       self._detectUsefulFeatures()

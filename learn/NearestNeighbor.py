@@ -4,7 +4,7 @@ from sklearn.neighbors import KNeighborsRegressor
 import Score
 
 class NearestNeighbor(object):
-  k_values = [2,3,5,8,13,21]
+  k_values = [5,8,13,21,34,55,89,144]
   
   def __init__(self, debug=False):
     self.debug = debug
