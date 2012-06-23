@@ -65,8 +65,8 @@ class Run:
     self.ensemble.addLearner(learn.GlmNet.GlmNet(debug=params.DEBUG))
 
 
-    for learner_class in params.ENSEMBLE:
-      self.ensemble.addLearner(eval("learn.%s.%s" %(learner_class, learner_class))(debug=params.DEBUG))
+#    for learner_class in params.ENSEMBLE:
+#      self.ensemble.addLearner(eval("learn.%s.%s" %(learner_class, learner_class))(debug=params.DEBUG))
 
 
     self.ensemble.train(self.ds_train, params.NUM_FOLDS)

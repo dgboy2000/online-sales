@@ -1,5 +1,5 @@
 DEBUG = True
-NUM_FOLDS = 3
+NUM_FOLDS = 4
 USE_DATA_CACHE = True
 
 ENSEMBLE = [
