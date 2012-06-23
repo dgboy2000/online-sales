@@ -33,9 +33,9 @@ class Run:
       
   def _setup(self):
     self.ds_train = self._readOrLoadDataset('train')
-    self.ds_test = self._readOrLoadDataset('test', useless_features = self.ds_train.getUselessFeatures())
+    self.ds_test = self._readOrLoadDataset('test', reference_dataset = self.ds_train)
 
-  def _readOrLoadDataset(self, ds_type, useless_features = None):
+  def _readOrLoadDataset(self, ds_type, reference_dataset = None):
     fname = "cache/%s_data.pickle" %ds_type
     try:
       if not params.USE_DATA_CACHE:
@@ -51,8 +51,17 @@ class Run:
       data_fname = "data/%s.csv" %ds_type
       ds = DataSet.DataSet(ds_type == 'train')
       ds.importData(data_fname)
-      if useless_features is not None:
-        ds.dropUselessFeatures(useless_features)
+      
+      if reference_dataset is not None:
+        ds.dropUselessFeatures(reference_dataset.getUselessFeatures())
+      if params.LOG_TRANSFORM:  
+        ds.logTransformQuantitativeFeatures()
+      if params.STANDARDIZE_DATA:
+        ds.standardizeQuantitativeFeatures(
+          means = (reference_dataset.getQuantitativeFeatureMeans() if reference_dataset is not None else None),
+          variances = (reference_dataset.getQuantitativeFeatureVariances() if reference_dataset is not None else None)
+        )
+        
       pickle.dump(ds, open(fname, 'w'))
 
     return ds

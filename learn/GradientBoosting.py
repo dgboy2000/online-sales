@@ -12,7 +12,7 @@ class GradientBoosting(object):
     
   def train(self, dataset):
     if self.debug:
-      print "Train SuportVectorMachines with %d features..." %(dataset.getNumFeatures())
+      print "Training GradientBoosting model with %d features..." %(dataset.getNumFeatures())
 
     self.regressor_list = []
     

@@ -2,12 +2,16 @@ DEBUG = True
 NUM_FOLDS = 3
 USE_DATA_CACHE = True
 
+# Data transformations
+LOG_TRANSFORM = False
+STANDARDIZE_DATA = True
+
 ENSEMBLE = [
   'LinearRegression',
   'QuantLinearRegression',
   'RidgeRegression',
-  'RandomForest',
-  'SupportVectorMachines',
+  # 'RandomForest',
+  # 'SupportVectorMachines',
   'GradientBoosting',
   # 'DecisionTree',
   'NearestNeighbor'
@@ -22,7 +26,8 @@ FEATURE_CACHE = {
   'RidgeRegression': True,
   'GradientBoosting': True,
   'RandomForest': True,
-  'NearestNeighbor': True
+  'NearestNeighbor': True,
+  'SupportVectorMachines': True
 }
 
 
