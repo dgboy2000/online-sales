@@ -9,7 +9,7 @@ ENSEMBLE = [
   'RandomForest',
   'SupportVectorMachines',
   'GradientBoosting',
-  'DecisionTree',
+  # 'DecisionTree',
   'NearestNeighbor'
 ]
 
