@@ -7,14 +7,15 @@ LOG_TRANSFORM = False
 STANDARDIZE_DATA = True
 
 ENSEMBLE = [
-  'LinearRegression',
-  'QuantLinearRegression',
+  # 'LinearRegression',
+  # 'QuantLinearRegression',
   'RidgeRegression',
-  # 'RandomForest',
-  # 'SupportVectorMachines',
+  'RandomForest',
+  'SupportVectorMachines',
   'GradientBoosting',
   # 'DecisionTree',
-  'NearestNeighbor'
+  # 'NearestNeighbor',
+  'GlmNet'
 ]
 
 # ENSEMBLE = [ 'DecisionTree' ]
@@ -27,7 +28,8 @@ FEATURE_CACHE = {
   'GradientBoosting': True,
   'RandomForest': True,
   'NearestNeighbor': True,
-  'SupportVectorMachines': True
+  'SupportVectorMachines': True,
+  'GlmNet': True
 }
 
 
