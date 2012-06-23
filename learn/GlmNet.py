@@ -2,14 +2,14 @@ from LearnerBase import LearnerBase
 import numpy as np
 from scipy import linalg
 import Score
-import rpy2.interactive as r
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-import rpy2.robjects.numpy2ri
-rpy2.robjects.numpy2ri.activate()
+# import rpy2.interactive as r
+# import rpy2.robjects as robjects
+# from rpy2.robjects.packages import importr
+# import rpy2.robjects.numpy2ri
+# rpy2.robjects.numpy2ri.activate()
 from DataSet import DataSet
-import scikits.learn.linear_model as lm
-import scikits.learn
+import sklearn.linear_model as lm
+import sklearn
 
 class GlmNet(object):
     alpha_values = [(i+1) * .01 for i in range(10)]
@@ -17,7 +17,7 @@ class GlmNet(object):
     def __init__(self,debug=False):
         self.debug = debug
         self.params = None
-        self.glmnet = importr("glmnet")
+        # self.glmnet = importr("glmnet")
         self.glm_list = None
         
         self.best_rmsle_list = [float("inf")] * 12
@@ -43,7 +43,7 @@ class GlmNet(object):
                 alpha = alpha_list[month_ind]
             model = lm.ElasticNet(rho=0.8, alpha=alpha)
             
-            print len(x), len(x[0]), len(monthly_sales)
+            # print len(x), len(x[0]), len(monthly_sales)
             model.fit(x, monthly_sales)
             self.glm_list.append(model)
     
@@ -59,20 +59,20 @@ class GlmNet(object):
                 
                 self._train(fold_train, alpha)
                 
-                print "sale: %s" % fold_test.getSales()
-                print "predict: %s" % self.predict(fold_test)
+                # print "sale: %s" % fold_test.getSales()
+                # print "predict: %s" % self.predict(fold_test)
                 score.addFold(fold_test.getSales(), self.predict(fold_test))
-            print score
+            # print score
                 
             for month_ind in range(12):
                 cur_rmsle = score.getRMSLE(month_ind)
-                print "month_ind %d: cur_rmsle: %f" % (month_ind, cur_rmsle)
+                # print "month_ind %d: cur_rmsle: %f" % (month_ind, cur_rmsle)
                 
                 if cur_rmsle < self.best_rmsle_list[month_ind]:
                     self.best_rmsle_list[month_ind] = cur_rmsle
                     self.best_alpha_list[month_ind] = alpha
                     
-            print "best rmsle: %s" % str(self.best_rmsle_list)
+            # print "best rmsle: %s" % str(self.best_rmsle_list)
             print "best alpha: %s" % str(self.best_alpha_list)
             
     def train(self, dataset):

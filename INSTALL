@@ -2,3 +2,5 @@ sudo easy_install -U scikit-learn
 sudo apt-get install python-numpy
 sudo apt-get install python-scipy
 download the latest: http://sourceforge.net/projects/rpy/files/rpy2/ then untar and "sudo python setup.py install"
+
+

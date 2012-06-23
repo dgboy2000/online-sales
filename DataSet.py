@@ -120,11 +120,28 @@ class DataSet:
     headers = self.headers
     num_samples = self.getNumSamples()
     
-    headers.append('Quant_PrelaunchMarketingDays')
     date1_ind = headers.index('Date_1')
     date2_ind = headers.index('Date_2')
+    
+    headers.append('Quant_PrelaunchMarketingDays')
     new_feat = (features[:, date1_ind]-features[:, date2_ind]).reshape((num_samples, 1))
     features = np.append(features, new_feat, axis=1)
+    
+    headers.append('Quant_LaunchDayOfYear')
+    new_feat = np.mod((features[:, date1_ind]).reshape((num_samples, 1)), 365)
+    features = np.append(features, new_feat, axis=1)
+    
+    headers.append('Quant_LaunchYear')
+    new_feat = np.floor(np.divide((features[:, date1_ind]).reshape((num_samples, 1)), 365))
+    features = np.append(features, new_feat, axis=1)
+    
+    # headers.append('Quant_AnnouncementDayOfYear')
+    # new_feat = np.mod((features[:, date2_ind]).reshape((num_samples, 1)), 365)
+    # features = np.append(features, new_feat, axis=1)
+    # 
+    # headers.append('Quant_AnnouncementYear')
+    # new_feat = np.floor(np.divide((features[:, date2_ind]).reshape((num_samples, 1)), 365))
+    # features = np.append(features, new_feat, axis=1)
     
     self._setFeatures(features, headers)
     
