@@ -14,17 +14,24 @@ class Score:
       self.sales = np.vstack((self.sales, sales))
       self.predictions = np.vstack((self.predictions, predictions))
   
-  def getRMSLE(self):    
+  def getRMSLE(self, month_ind=None):    
     N = 0
     SE = 0
     num_samples, num_sales = self.sales.shape
-    for i in range(num_samples):
-      for j in range(num_sales):
-        if self.sales[i, j] > 0:
+
+    if month_ind:
+      for i in range(num_samples):
+        if self.sales[i, month_ind] > 0:
           N += 1
-          SE += (self.sales[i, j] - self.predictions[i, j]) ** 2
+          SE += (self.sales[i, month_ind] - self.predictions[i, month_ind]) ** 2
+    else:
+      for i in range(num_samples):
+        for j in range(num_sales):
+          if self.sales[i, j] > 0:
+            N += 1
+            SE += (self.sales[i, j] - self.predictions[i, j]) ** 2
     
-    return math.sqrt( SE / N )
+    return math.sqrt( SE / N ) if N > 0 else 0.
     
     
     

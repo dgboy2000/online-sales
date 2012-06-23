@@ -14,11 +14,13 @@ Data Notes:
 
 Methods:
 -GLM_Net: weighted combination of L1 and L2 ridge regressions
--Gradient boosting
 -Splines
--Random Forest
+-Logistic regression?
+-Gaussian Processes
 -Neural Networks; input these to other model to make model of residuals?
--BIC-score based feature selection
+-Feature selection: BIC-score, scikit-learn
+-Bagging: sample the data with replacement, train an ensemble on the sample, then average the predictions across models trained on the different samples
+-Dimensionality reduction: LDA & SVD
 
 
 

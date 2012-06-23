@@ -36,6 +36,11 @@ dataset = run.ds_train
 month_ind = 1
 monthly_sales = dataset.getSalesForMonth(month_ind)
 x = dataset.getFeaturesForMonth(month_ind)
+x /= x.std(0) 
+eps = 5e-3
+print "Computing regularization path using the elastic net..."
+models = enet_path(x, monthly_sales, eps=eps, rho=0.8)
+
 mx = robjects.r.matrix(x,ncol=dataset.getNumFeatures())
 y = robjects.vectors.FloatVector(monthly_sales)
 fit1 = glmnet.glmnet(mx,y)
