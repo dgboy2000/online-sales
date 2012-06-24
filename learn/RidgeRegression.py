@@ -2,17 +2,21 @@ from LearnerBase import LearnerBase
 import numpy as np
 from scipy import linalg
 import Score
+import math
 
 class RidgeRegression(object):
-  num_iterations = 30
-  min_k_list = np.array([.1] * 12)
-  max_k_list = np.array([20.] * 12)
-  
   def __init__(self, debug=False):
     self.debug = debug
     self.k_list = None
     self.params = None
     self.best_rmsle_list = [float("inf")] * 12
+
+    self.max_depth = 5
+    self.max_width = 8
+
+    self.is_best = False
+    self.num_prunes = 0
+    self.num_iterations = 0
     
   def _train(self, dataset, k, k_list = None):
     # http://en.wikipedia.org/wiki/Tikhonov_regularization
@@ -42,7 +46,8 @@ class RidgeRegression(object):
     self.params = params
 
   def get_rmsle_list(self, dataset, num_folds, k_list):
-    # print "get_rmsle_list k_list: %s" % k_list
+    self.num_iterations += 1
+
     rmsle_list = []
     
     score = Score.Score()
@@ -57,44 +62,87 @@ class RidgeRegression(object):
       rmsle_list.append(cur_rmsle)
       
       if cur_rmsle < self.best_rmsle_list[month_ind]:
+        self.is_best = True
         self.best_rmsle_list[month_ind] = cur_rmsle
         self.k_list[month_ind] = k_list[month_ind]
-
-    # print "get_rmsle_list k_list: %s returns %s" % (k_list, rmsle_list)
+      # print "best_rmsle_list: %s" % str(self.best_rmsle_list)
+    print "k_list: %s" % k_list
+    print "best_k_list: %s" % str(self.k_list)
     return rmsle_list
 
-  def tenary_search(self, dataset, num_folds):
-    left_k_list = (RidgeRegression.min_k_list * 2. + RidgeRegression.max_k_list) / 3.
-    left_rmsle_list = self.get_rmsle_list(dataset, num_folds, left_k_list)
-    # print "  left_k_list: %s" % left_k_list
+  def is_good(self, orders):
+    # print "  is_bad orders: %s" % (orders)
     
-    right_k_list = (RidgeRegression.min_k_list + RidgeRegression.max_k_list * 2.) / 3.
-    right_rmsle_list = self.get_rmsle_list(dataset, num_folds, right_k_list)
-    # print "  right_k_list: %s" % right_k_list
+    for i in range(12):
+      order = [orders[i][j][1] for j in range(len(orders[i]))]
+      # print "order: %s" % (order)
+      if order != sorted(order) and order != sorted(order, reverse=True):
+        return True
 
-    for month_ind in range(12):
-      if left_rmsle_list[month_ind] < right_rmsle_list[month_ind]:
-        RidgeRegression.max_k_list[month_ind] = right_k_list[month_ind]
+    return False
+
+  def search(self, dataset, num_folds, depth, width, min_k_list, max_k_list):
+    if depth <= 0:
+      return
+
+    print "search: depth %d width %d" % (depth, width)
+    # print "  min_k_list: %s" % str(min_k_list)
+    # print "  max_k_list: %s" % str(max_k_list)
+
+    min_k_lists = []
+    max_k_lists = []
+    rmsle_lists = []
+
+    for i in range(width):
+      min_k_lists.append(min_k_list + (max_k_list - min_k_list) * (float(i) / width))
+      max_k_lists.append(min_k_list + (max_k_list - min_k_list) * (float(i+1) / width))
+
+    self.is_best = False
+    for i in range(width):
+      k_list = (min_k_lists[i] + max_k_lists[i]) / 2
+      # print "    k_list: %s" % str (k_list)
+
+      rmsle_list = self.get_rmsle_list(dataset, num_folds, k_list)
+      # print "    rmsle_list: %s" % str (rmsle_list)
+      rmsle_lists.append(rmsle_list)
+
+    if depth > 1:
+      orders = []
+
+      for month_ind in range(12):
+        order = []
+        for i in range(width):
+          order.append((rmsle_lists[i][month_ind], i))
+        # print 'order: %s' % str(order)
+        order.sort()
+        # print 'orderred: %s' % str(order)
+        orders.append(order)
+
+      if self.is_best or self.is_good(orders):
+        for i in range(width):
+          # print "range: %d" % i
+          new_min_k_list = []
+          new_max_k_list = []
+          for month_ind in range(12):
+            new_min_k_list.append(min_k_lists[orders[month_ind][i][1]][month_ind])
+            new_max_k_list.append(max_k_lists[orders[month_ind][i][1]][month_ind])
+          # print "  new_min_k_list: %s" % str(new_min_k_list)
+          # print "  new_max_k_list: %s" % str(new_max_k_list)
+          self.search(dataset, num_folds, depth-1, width, np.array(new_min_k_list), np.array(new_max_k_list))  
       else:
-        RidgeRegression.min_k_list[month_ind] = left_k_list[month_ind]
+        self.num_prunes += math.pow(self.max_width, depth - 1)
+    print "num_iterations: %d" % self.num_iterations
+    print "num_prunes: %d" % self.num_prunes
 
-    if self.debug:  
-      print "  min_k_list: %s" % (RidgeRegression.min_k_list)
-      print "  max_k_list: %s" % (RidgeRegression.max_k_list)
-      print "  k_list: %s" % self.k_list
-    
+
   def cross_validate(self, dataset, num_folds):
-    if self.debug:
-      self.k_list = [5.87542267, 4.674982, 8.13359445, 6.74467722, 6.08883212, 6.17201609, 5.29976006, 4.99435439, 5.72486321, 13.28838441, 5.22491289, 5.99526002]
-    else:
+    self.k_list = [7.6409912109375, 6.8924560546875, 8.2188720703125, 8.2130126953125, 8.2811279296875, 7.9522705078125, 7.9453125, 6.6873779296875, 7.2608642578125, 7.0821533203125, 7.1634521484375, 8.4375]
+    if 0:
       dataset.createFolds(num_folds)
-
       best_rmsle_list = [float("inf")] * 12
-      self.k_list = [0] * 12
-
-      for i in range(RidgeRegression.num_iterations):
-        print "Tenary search iteration: %d" % (i+1)
-        self.tenary_search(dataset, num_folds)
+      min_k_list = np.array([6] * 12)
+      max_k_list = np.array([9] * 12)
+      self.search(dataset, num_folds, self.max_depth, self.max_width, min_k_list, max_k_list)
         
   def train(self, dataset):
     if self.debug:
