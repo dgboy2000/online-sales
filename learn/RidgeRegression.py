@@ -130,13 +130,13 @@ class RidgeRegression(object):
           # print "  new_max_k_list: %s" % str(new_max_k_list)
           self.search(dataset, num_folds, depth-1, width, np.array(new_min_k_list), np.array(new_max_k_list))  
       else:
-        self.num_prunes += math.pow(self.max_width, depth - 1)
+        self.num_prunes += math.pow(self.max_width, depth)
     print "num_iterations: %d" % self.num_iterations
     print "num_prunes: %d" % self.num_prunes
 
 
   def cross_validate(self, dataset, num_folds):
-    self.k_list = [7.6409912109375, 6.8924560546875, 8.2188720703125, 8.2130126953125, 8.2811279296875, 7.9522705078125, 7.9453125, 6.6873779296875, 7.2608642578125, 7.0821533203125, 7.1634521484375, 8.4375]
+    self.k_list = [7.3476104736328125, 6.8925933837890625, 8.2190093994140625, 8.2137908935546875, 8.2814483642578125, 7.9523162841796875, 7.9453582763671875, 6.6873321533203125, 7.2606353759765625, 7.0821990966796875, 7.1634979248046875, 8.4375]
     if 0:
       dataset.createFolds(num_folds)
       best_rmsle_list = [float("inf")] * 12

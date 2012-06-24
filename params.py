@@ -18,7 +18,7 @@ ENSEMBLE = [
     # 'NearestNeighbor',
 ]
 
-ENSEMBLE = [ 'RidgeRegression' ]
+ENSEMBLE = [ 'RandomForest' ]
 
 FEATURE_CACHE = {
     'LinearRegression': True,
