@@ -68,8 +68,6 @@ class DataSet:
   def getNumSamples(self):
     return self.num_samples
     
-    
-    
   def logTransformQuantitativeFeatures(self):
     quant_feat_inds = self._getQuantitativeHeaderInds()
     if (self.features[:, quant_feat_inds] == 0).sum() > 0:
@@ -96,8 +94,6 @@ class DataSet:
     
   def getQuantitativeFeatureVariances(self):
     return self.quant_variances
-    
-    
 
   def _normalizeSales(self, row):
     ret = copy.deepcopy(row);
@@ -134,14 +130,10 @@ class DataSet:
     headers.append('Quant_LaunchYear')
     new_feat = np.floor(np.divide((features[:, date1_ind]).reshape((num_samples, 1)), 365))
     features = np.append(features, new_feat, axis=1)
-    
-    # headers.append('Quant_AnnouncementDayOfYear')
-    # new_feat = np.mod((features[:, date2_ind]).reshape((num_samples, 1)), 365)
-    # features = np.append(features, new_feat, axis=1)
-    # 
-    # headers.append('Quant_AnnouncementYear')
-    # new_feat = np.floor(np.divide((features[:, date2_ind]).reshape((num_samples, 1)), 365))
-    # features = np.append(features, new_feat, axis=1)
+
+    headers.append('Quant_LaunchMonth')
+    new_feat = np.floor(np.divide(np.mod((features[:, date1_ind]).reshape((num_samples, 1)), 365), 30))
+    features = np.append(features, new_feat, axis=1)
     
     self._setFeatures(features, headers)
     

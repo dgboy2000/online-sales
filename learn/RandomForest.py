@@ -7,13 +7,13 @@ import math
 
 class RandomForest(object):
   split_values = [1, 2, 3, 4]
-  # split_values = [2]
+  split_values = [2]
 
   def __init__(self, debug=False):
     self.debug = debug
 
     self.max_depth = 1
-    self.max_width = 5
+    self.max_width = 4
     self.min_n_estimators = 0
     self.max_n_estimators = 150
 
@@ -140,8 +140,8 @@ class RandomForest(object):
     print "num_prunes: %d" % self.num_prunes
 
   def cross_validate(self, dataset, num_folds):
-    self.n_estimators_list = [131, 88, 63, 22, 56, 148, 93, 18, 97, 93, 117, 107]
-    self.min_samples_split_list = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    self.n_estimators_list =  [75, 105, 75, 45, 45, 135, 135, 75, 45, 75, 45, 105]
+    self.min_samples_split_list = [4, 1, 3, 1, 2, 4, 2, 2, 4, 4, 4, 4]
 
     if 1:
       dataset.createFolds(num_folds)
