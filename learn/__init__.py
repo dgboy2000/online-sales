@@ -6,5 +6,6 @@ import SupportVectorMachines
 import GradientBoosting
 import GlmNet
 
+import utils
 
 
