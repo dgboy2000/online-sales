@@ -18,7 +18,7 @@ ENSEMBLE = [
     # 'NearestNeighbor',
 ]
 
-ENSEMBLE = [ 'GradientBoosting' ]
+ENSEMBLE = [ 'RidgeRegression' ]
 
 FEATURE_CACHE = {
     'LinearRegression': True,
