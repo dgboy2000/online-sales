@@ -7,13 +7,13 @@ import math
 
 class RandomForest(object):
   split_values = [1, 2, 3, 4]
-  # split_values = [1]
-  
+  split_values = [2]
+
   def __init__(self, debug=False):
     self.debug = debug
 
-    self.max_depth = 1
-    self.max_width = 10
+    self.max_depth = 3
+    self.max_width = 4
     self.num_iterations = 0
     self.num_prunes = 0
     self.is_best = False
@@ -41,6 +41,7 @@ class RandomForest(object):
       self.regressor_list.append(rf)
 
   def get_rmsle_list(self, dataset, num_folds, n_estimators_list, min_samples_split_list):
+    self.num_iterations += 1
     print 'n_estimators_list: %s' % n_estimators_list
 
     rmsle_list = []
@@ -146,7 +147,7 @@ class RandomForest(object):
       for split in RandomForest.split_values:
         print "Split: %d" % (split)
         self.min_n_estimators_list = np.array([0] * 12)
-        self.max_n_estimators_list = np.array([200] * 12)
+        self.max_n_estimators_list = np.array([150] * 12)
 
         self.search(dataset, num_folds, self.max_depth, self.max_width, 
                     self.min_n_estimators_list, self.max_n_estimators_list,

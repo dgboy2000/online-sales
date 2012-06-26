@@ -18,7 +18,7 @@ ENSEMBLE = [
     # 'NearestNeighbor',
 ]
 
-ENSEMBLE = [ 'RandomForest' ]
+ENSEMBLE = [ 'GradientBoosting' ]
 
 FEATURE_CACHE = {
     'LinearRegression': True,
