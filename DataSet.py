@@ -20,6 +20,7 @@ class DataSet:
     self.quant_variances = None
     self.train_set_flag = train_set_flag
     self.useless_features = set()
+    self.nan_columns = []
     
   def _getQuantitativeHeaderInds(self):
     quantitative_header_inds = []
@@ -57,7 +58,6 @@ class DataSet:
     """Return the non-NaN sales data for the specified month ind [0-11]."""
     month_inds = self.getIndsForMonth(month_ind)
     return self.sales[self.getIndsForMonth(month_ind), month_ind]
-    
     
   def getNumFeatures(self):
     return self.num_features
@@ -104,7 +104,49 @@ class DataSet:
       else:
         ret[i] = math.log(float(ret[i]) + 1)
     return ret
-    
+
+  def _detectNanColumns(self):
+    if len(self.nan_columns) > 0:
+      raise "Already processed useful features; can't do this twice"
+    features = self.features
+    headers = self.headers
+    num_samples = self.getNumSamples()
+    num_features = self.getNumFeatures()
+
+    self.nan_columns = []
+    for j in range(num_features):
+      num_nans = 0
+      for i in range(num_samples):
+        if math.isnan(features[i,j]):
+          num_nans += 1
+
+      if num_nans > 0:
+        print "%s: %d nans" % (headers[j], num_nans)
+        self.nan_columns.append(j)
+    self.addNanFeatures(self.nan_columns)
+
+  def getNanColumns(self):
+    return self.nan_columns
+
+  def addNanFeatures(self, nan_columns):
+    features = self.features
+    headers = self.headers
+    num_samples = self.getNumSamples()
+    num_features = self.getNumFeatures()
+
+    for j in nan_columns:
+      nans = []
+      for i in range(num_samples):
+        if math.isnan(features[i,j]):
+          nans.append(1.)
+        else:
+          nans.append(0.)
+
+      headers.append('Quant_Nan_%s' % headers[j])
+      new_feat = np.array(nans).reshape((num_samples, 1))
+      features = np.append(features, new_feat, axis=1)
+    self._setFeatures(features, headers)
+
   def _changeNanToZero(self):
     for i in range(self.num_samples):
       for j in range(self.num_features):
@@ -118,7 +160,7 @@ class DataSet:
     
     date1_ind = headers.index('Date_1')
     date2_ind = headers.index('Date_2')
-    
+
     headers.append('Quant_PrelaunchMarketingDays')
     new_feat = (features[:, date1_ind]-features[:, date2_ind]).reshape((num_samples, 1))
     features = np.append(features, new_feat, axis=1)
@@ -134,11 +176,16 @@ class DataSet:
     headers.append('Quant_LaunchMonth')
     new_feat = np.floor(np.divide(np.mod((features[:, date1_ind]).reshape((num_samples, 1)), 365), 30))
     features = np.append(features, new_feat, axis=1)
-    
+
+    headers.append('Quant_MonthLaunch')
+    new_feat = np.floor(np.divide((features[:, date1_ind]).reshape((num_samples, 1)), 30))
+    features = np.append(features, new_feat, axis=1)
+
     self._setFeatures(features, headers)
     
   def getUselessFeatures(self):
     return self.useless_features
+
   def dropUselessFeatures(self, feature_inds):
     if len(self.useless_features) > 0:
       raise "Already processed useful features; can't do this twice"
@@ -161,9 +208,9 @@ class DataSet:
   def _detectUsefulFeatures(self):
     if len(self.useless_features) > 0:
       raise "Already processed useful features; can't do this twice"
-      
-    self.useless_features.update(self._detectZeroVarianceFeatures())
+    
     self.useless_features.update(self._detectDuplicateFeatures())
+    self.useless_features.update(self._detectZeroVarianceFeatures())
     self._dropFeatureInds(self.useless_features)
     
   def _detectZeroVarianceFeatures(self):
@@ -219,12 +266,12 @@ class DataSet:
       headers = headers[1:]
     
     self._setFeatures(features, headers)
-    
     self._changeNanToZero()
     self._addDerivedFeatures()
-          
+
     if self.train_set_flag:
       self._detectUsefulFeatures()
+      self._detectNanColumns()
     
   def createFolds(self, num_folds):
     assert self.train_set_flag, "Can only create folds of training data"
