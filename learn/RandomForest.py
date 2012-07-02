@@ -12,8 +12,11 @@ class RandomForest(object):
   def __init__(self, debug=False):
     self.debug = debug
 
-    self.max_depth = 3
+    self.max_depth = 1
     self.max_width = 4
+    self.min_n_estimators = 0
+    self.max_n_estimators = 150
+
     self.num_iterations = 0
     self.num_prunes = 0
     self.is_best = False
@@ -36,9 +39,9 @@ class RandomForest(object):
       assert min_samples_split_list is not None
       min_samples_split = min_samples_split_list[month_ind]
 
-      rf = RandomForestRegressor(n_estimators=n_estimators, min_samples_split=min_samples_split)
-      rf.fit(dataset.getFeaturesForMonth(month_ind), month_sales)
-      self.regressor_list.append(rf)
+      regressor = RandomForestRegressor(n_estimators=n_estimators, min_samples_split=min_samples_split)
+      regressor.fit(dataset.getFeaturesForMonth(month_ind), month_sales)
+      self.regressor_list.append(regressor)
 
   def get_rmsle_list(self, dataset, num_folds, n_estimators_list, min_samples_split_list):
     self.num_iterations += 1
@@ -137,8 +140,8 @@ class RandomForest(object):
     print "num_prunes: %d" % self.num_prunes
 
   def cross_validate(self, dataset, num_folds):
-    self.n_estimators_list = [100, 106, 117, 84, 91, 50, 100, 66, 58, 33, 77, 117]
-    self.min_samples_split_list = [2, 1, 2, 4, 1, 1, 2, 1, 1, 2, 3, 1]
+    self.n_estimators_list =  [75, 105, 75, 45, 45, 135, 135, 75, 45, 75, 45, 105]
+    self.min_samples_split_list = [4, 1, 3, 1, 2, 4, 2, 2, 4, 4, 4, 4]
 
     if 1:
       dataset.createFolds(num_folds)

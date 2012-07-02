@@ -9,7 +9,7 @@ STANDARDIZE_DATA = True
 ENSEMBLE = [
     'RidgeRegression',
     'RandomForest',
-    'SupportVectorMachines',
+    # 'SupportVectorMachines',
     'GradientBoosting',
     'GlmNet'
     # 'LinearRegression',
@@ -18,7 +18,7 @@ ENSEMBLE = [
     # 'NearestNeighbor',
 ]
 
-ENSEMBLE = [ 'GradientBoosting' ]
+# ENSEMBLE = [ 'SupportVectorMachines' ]
 
 FEATURE_CACHE = {
     'LinearRegression': True,

@@ -6,14 +6,15 @@ import math
 
 class RidgeRegression(object):
   def __init__(self, debug=False):
+    self.max_depth = 1
+    self.max_width = 10
+    self.min_k = 6.
+    self.max_k = 9.
+
     self.debug = debug
     self.k_list = None
     self.params = None
     self.best_rmsle_list = [float("inf")] * 12
-
-    self.max_depth = 5
-    self.max_width = 8
-
     self.is_best = False
     self.num_prunes = 0
     self.num_iterations = 0
@@ -137,11 +138,11 @@ class RidgeRegression(object):
 
   def cross_validate(self, dataset, num_folds):
     self.k_list = [7.3476104736328125, 6.8925933837890625, 8.2190093994140625, 8.2137908935546875, 8.2814483642578125, 7.9523162841796875, 7.9453582763671875, 6.6873321533203125, 7.2606353759765625, 7.0821990966796875, 7.1634979248046875, 8.4375]
-    if 0:
+    if 1:
       dataset.createFolds(num_folds)
       best_rmsle_list = [float("inf")] * 12
-      min_k_list = np.array([6] * 12)
-      max_k_list = np.array([9] * 12)
+      min_k_list = np.array([self.min_k] * 12)
+      max_k_list = np.array([self.max_k] * 12)
       self.search(dataset, num_folds, self.max_depth, self.max_width, min_k_list, max_k_list)
         
   def train(self, dataset):

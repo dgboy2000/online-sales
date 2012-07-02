@@ -54,6 +54,8 @@ class Run:
       
       if reference_dataset is not None:
         ds.dropUselessFeatures(reference_dataset.getUselessFeatures())
+        ds.addNanFeatures(reference_dataset.getNanColumns())
+        
       if params.LOG_TRANSFORM:  
         ds.logTransformQuantitativeFeatures()
       if params.STANDARDIZE_DATA:

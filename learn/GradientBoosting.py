@@ -6,8 +6,10 @@ import Score
 class GradientBoosting(object):
   def __init__(self, debug=False):
     self.debug = debug
-    self.max_depth = 3
-    self.max_width = 4
+    self.max_depth = 1
+    self.max_width = 5
+    self.min_n_estimators = 50
+    self.max_n_estimators = 250
     self.num_iterations = 0
     self.num_prunes = 0
     self.is_best = False
@@ -118,14 +120,14 @@ class GradientBoosting(object):
     print "num_prunes: %d" % self.num_prunes
 
   def cross_validate(self, dataset, num_folds):
-    self.n_estimators_list = [100, 106, 117, 84, 91, 50, 100, 66, 58, 33, 77, 117]
+    self.n_estimators_list = [103, 232, 115, 126, 117, 185, 134, 117, 101, 204, 179, 85]
 
     if 1:
       dataset.createFolds(num_folds)
       self.best_rmsle_list = [float("inf")] * 12
       
-      self.min_n_estimators_list = np.array([0] * 12)
-      self.max_n_estimators_list = np.array([250] * 12)
+      self.min_n_estimators_list = np.array([self.min_n_estimators] * 12)
+      self.max_n_estimators_list = np.array([self.max_n_estimators] * 12)
       self.search(dataset, num_folds, self.max_depth, self.max_width, self.min_n_estimators_list, self.max_n_estimators_list)
     
   def train(self, dataset):
