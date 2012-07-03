@@ -19,7 +19,7 @@ class R2FeatureSelector:
       slope, intercept, r_value, p_value, std_err = linregress(features[:, feat_ind], y=target)
       feat_regressions.append([feat_ind, slope, r_value, p_value])
 
-    feat_regressions.sort(key=lamba data_list: -data_list[2])
+    feat_regressions.sort(key=lambda data_list: -data_list[2])
     
     top_variables = feat_regressions[:num_variables]
     self.selected_feat_inds = [data[0] for data in top_variables if data[3] <= p_value]

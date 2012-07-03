@@ -6,7 +6,7 @@ import Score
 import math
 
 class RandomForest(object):
-  split_values = [1, 2, 3, 4]
+  # split_values = [1, 2, 3, 4]
   split_values = [2]
 
   def __init__(self, debug=False):
